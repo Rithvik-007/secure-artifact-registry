@@ -9,6 +9,7 @@ from app.models import User
 from app.db import engine
 from app.security import hash_password
 from app.models import Artifact, ArtifactType, VisibilityType, ArtifactVersion, ArtifactFile, ArtifactShare
+from app.settings import settings
 
 
 # helper function to verify artifact version existence
@@ -153,7 +154,7 @@ def create_artifact_file(version_id: int, owner_id: int, file: UploadFile) -> Ar
         artifact = session.get(Artifact, artifact_id)
         
         project_root = Path(__file__).parent.parent
-        storage_dir = project_root / "storage" /f"user_{owner_id}" /f"artifact_{artifact.id}" / f"version_{version_id}"
+        storage_dir = project_root / settings.storage_root / f"user_{owner_id}" / f"artifact_{artifact.id}" / f"version_{version_id}"
         storage_dir.mkdir(parents=True, exist_ok=True)
        
         original_filename = file.filename or "unnamed_file"

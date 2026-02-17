@@ -1,9 +1,10 @@
 import jwt
 from datetime import datetime, timedelta, timezone
+from app.settings import settings
 
-SECRET_KEY = "c292cf5033690f7b5727aba144768607e1bfd02da7d0810766a52959770cd914"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()

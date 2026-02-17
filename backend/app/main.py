@@ -1,9 +1,10 @@
-
+import os
 from fastapi import FastAPI, File, HTTPException, Depends, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
 from app.db import engine
+from app.init_db import init_db
 from app.schemas import RegisterRequest, UserResponse, ArtifactResponse
 from app.crud import can_read_artifact, create_user, get_user_by_email, create_artifact, get_artifacts_by_owner, create_artifact_version, list_artifact_versions, create_artifact_file, get_file_record, list_files_for_version, delete_file, share_artifact
 from app.security import verify_password
@@ -11,14 +12,24 @@ from app.auth import create_access_token
 from app.schemas import LoginRequest, TokenResponse, ArtifactCreateRequest, ArtifactVersionRequest, ArtifactVersionResponse, ArtifactFileResponse, ShareRequest, ShareResponse
 from app.deps import get_current_user
 from app.models import User, Artifact, ArtifactShare, VisibilityType
+from app.settings import settings
+from contextlib import asynccontextmanager
+
+print("CWD:", os.getcwd())
+print("DB URL:", settings.database_url)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    print("Database initialized.")
+    yield
+    print("Database shutdown.")
 
 
-app = FastAPI()
-
-origins = ["http://localhost:5173"]
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(CORSMiddleware, 
-    allow_origins=origins,
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -258,3 +269,5 @@ def list_accessible_artifacts(current_user: User = Depends(get_current_user)) ->
         for artifact in artifacts
     ]
 
+
+    
